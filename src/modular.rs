@@ -91,7 +91,11 @@ impl<const BITS: usize, const LIMBS: usize> Uint<BITS, LIMBS> {
             if modulus.is_zero() {
                 return Self::ZERO;
             }
-            return crate::zkvm::mul_mod_256(self, rhs, modulus);
+            return crate::zkvm::mul_mod_256(
+                self.reduce_mod(modulus),
+                rhs.reduce_mod(modulus),
+                modulus,
+            );
         }
         self.mul_mod_by_ref(&rhs, &mut modulus);
         modulus

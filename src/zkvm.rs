@@ -10,6 +10,12 @@ unsafe extern "C" {
 
 /// `(a * b) mod m` for 256-bit values, `m = 0` meaning `2^256`.
 ///
+/// The precompile's witness carries the quotient `⌊a · b / m⌋`, which has to
+/// stay below the (effective) modulus; `a, b < m` guarantees that, so
+/// operands at or above the modulus are reduced before the call
+/// ([`Uint::mul_mod`]).  An unreduced pair whose quotient reaches `m` leaves
+/// the precompile without a witness, and the shard without a proof.
+///
 /// The limbs are little-endian 64-bit words, which on this little-endian
 /// 32-bit target are the little-endian 32-bit words the precompile reads; the
 /// pointers are 8-byte aligned.  The precompile reads `y` and `m` as one
