@@ -86,6 +86,13 @@ impl<const BITS: usize, const LIMBS: usize> Uint<BITS, LIMBS> {
     #[inline(always)]
     #[must_use]
     pub fn mul_mod(self, rhs: Self, mut modulus: Self) -> Self {
+        #[cfg(target_os = "zkvm")]
+        if BITS == 256 {
+            if modulus.is_zero() {
+                return Self::ZERO;
+            }
+            return crate::zkvm::mul_mod_256(self, rhs, modulus);
+        }
         self.mul_mod_by_ref(&rhs, &mut modulus);
         modulus
     }

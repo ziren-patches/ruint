@@ -23,6 +23,8 @@ extern crate alloc;
 #[macro_use]
 mod macros;
 
+#[cfg(target_os = "zkvm")]
+mod zkvm;
 mod add;
 pub mod algorithms;
 pub mod aliases;
@@ -139,7 +141,7 @@ impl pu128 {
 ///   requires same-sized arguments and returns a pair of lower and higher bits.
 ///
 /// [std-overflow]: https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, Hash)]
 #[repr(transparent)]
 pub struct Uint<const BITS: usize, const LIMBS: usize> {
     limbs: [u64; LIMBS],
@@ -391,5 +393,21 @@ mod test {
             assert_eq!(Uint::<BITS, LIMBS>::MIN, Uint::<BITS, LIMBS>::ZERO);
             let _ = Uint::<BITS, LIMBS>::MAX;
         });
+    }
+}
+
+/// Limb-wise equality as a fold of xors: on 32-bit targets the derived
+/// implementation compares the limbs as memory, through `memcmp`, which is
+/// slower than the eight word loads and seven ors this compiles to.
+impl<const BITS: usize, const LIMBS: usize> PartialEq for Uint<BITS, LIMBS> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        let mut diff = 0u64;
+        let mut i = 0;
+        while i < LIMBS {
+            diff |= self.limbs[i] ^ other.limbs[i];
+            i += 1;
+        }
+        diff == 0
     }
 }

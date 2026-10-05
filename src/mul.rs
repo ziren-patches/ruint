@@ -61,6 +61,10 @@ impl<const BITS: usize, const LIMBS: usize> Uint<BITS, LIMBS> {
     #[inline(always)]
     #[must_use]
     pub fn wrapping_mul(self, rhs: Self) -> Self {
+        #[cfg(target_os = "zkvm")]
+        if BITS == 256 {
+            return crate::zkvm::mul_mod_256(self, rhs, Self::ZERO);
+        }
         let mut result = Self::ZERO;
         algorithms::addmul_n(&mut result.limbs, self.as_limbs(), rhs.as_limbs());
         result.apply_mask();

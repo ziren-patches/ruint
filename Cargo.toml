@@ -23,6 +23,9 @@ rustdoc-args = [
     ".cargo/katex-header.html",
 ]
 
+[target.'cfg(target_os = "zkvm")'.dependencies]
+zkm-lib = { git = "https://github.com/ProjectZKM/Ziren" }
+
 [workspace]
 members = [".", "ruint-macro", "ruint-bench"]
 resolver = "2"

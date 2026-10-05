@@ -72,7 +72,13 @@ impl<const BITS: usize, const LIMBS: usize> Uint<BITS, LIMBS> {
     #[inline]
     #[must_use]
     pub fn is_zero(&self) -> bool {
-        *self == Self::ZERO
+        let mut acc = 0u64;
+        let mut i = 0;
+        while i < LIMBS {
+            acc |= self.limbs[i];
+            i += 1;
+        }
+        acc == 0
     }
 
     /// Returns `true` if the value is zero.

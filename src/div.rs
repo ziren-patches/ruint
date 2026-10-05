@@ -58,6 +58,10 @@ impl<const BITS: usize, const LIMBS: usize> Uint<BITS, LIMBS> {
 
     #[inline(never)]
     pub(crate) fn div_rem_by_ref(numerator: &mut Self, rhs: &mut Self) {
+        #[cfg(target_os = "zkvm")]
+        if BITS == 256 {
+            return crate::zkvm::div_rem_256(numerator, rhs);
+        }
         algorithms::div::div_inlined(&mut numerator.limbs, &mut rhs.limbs);
     }
 
